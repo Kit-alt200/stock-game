@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shape Coding Adventure</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #ff6b6b;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .game-area {
+            display: flex;
+            width: 100%;
+            gap: 20px;
+        }
+        
+        .code-editor {
+            flex: 1;
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .shape-canvas {
+            flex: 1;
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        canvas {
+            background-color: #f9f9f9;
+            border: 2px dashed #ccc;
+            margin-top: 10px;
+        }
+        
+        .command-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        button {
+            background-color: #74b9ff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background-color: #0984e3;
+            transform: translateY(-2px);
+        }
+        
+        .run-btn {
+            background-color: #55efc4;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            margin-top: 10px;
+        }
+        
+        .run-btn:hover {
+            background-color: #00b894;
+        }
+        
+        .clear-btn {
+            background-color: #ff7675;
+        }
+        
+        .clear-btn:hover {
+            background-color: #d63031;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 200px;
+            border: 2px solid #dfe6e9;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            resize: none;
+        }
+        
+        .challenges {
+            margin-top: 30px;
+            width: 100%;
+        }
+        
+        .challenge-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .challenge-card h3 {
+            color: #6c5ce7;
+            margin-top: 0;
+        }
+        
+        .success-message {
+            color: #00b894;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .turtle {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="%2374b9ff"/><circle cx="35" cy="40" r="5" fill="white"/><circle cx="65" cy="40" r="5" fill="white"/><circle cx="35" cy="40" r="2" fill="black"/><circle cx="65" cy="40" r="2" fill="black"/><path d="M30,65 Q50,80 70,65" stroke="black" stroke-width="3" fill="none"/></svg>');
+            background-size: contain;
+            transition: transform 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌟 Shape Coding Adventure 🌟</h1>
+            <p>Learn coding by creating fun shapes and patterns!</p>
+        </header>
+        
+        <div class="game-area">
+            <div class="code-editor">
+                <h2>Your Code</h2>
+                <div class="command-buttons">
+                    <button onclick="addCommand('moveForward(50);')">Move Forward</button>
+                    <button onclick="addCommand('turnRight(90);')">Turn Right</button>
+                    <button onclick="addCommand('turnLeft(90);')">Turn Left</button>
+                    <button onclick="addCommand('penUp();')">Pen Up</button>
+                    <button onclick="addCommand('penDown();')">Pen Down</button>
+                    <button onclick="addCommand('changeColor("red");')">Red</button>
+                    <button onclick="addCommand('changeColor("blue");')">Blue</button>
+                    <button onclick="addCommand('changeColor("green");')">Green</button>
+                    <button onclick="addCommand('repeat(4, () => {\n  moveForward(50);\n  turnRight(90);\n});')">Repeat</button>
+                </div>
+                
+                <textarea id="codeArea" spellcheck="false">// Welcome to Shape Coding Adventure!
+// Try these commands to draw a square:
+
+penDown();
+repeat(4, () => {
+  moveForward(50);
+  turnRight(90);
+});
+</textarea>
+                
+                <button class="run-btn" onclick="runCode()">Run Code ▶</button>
+                <button class="clear-btn" onclick="clearCanvas()">Clear Canvas</button>
+            </div>
+            
+            <div class="shape-canvas">
+                <h2>Drawing Canvas</h2>
+                <canvas id="drawingCanvas" width="400" height="400"></canvas>
+                <div id="turtle" class="turtle"></div>
+                <p id="successMessage" class="success-message">Great job! You did it! 🎉</p>
+            </div>
+        </div>
+        
+        <div class="challenges">
+            <h2>Code Challenges</h2>
+            
+            <div class="challenge-card">
+                <h3>Challenge 1: Draw a Square</h3>
+                <p>Use the "Move Forward" and "Turn Right" commands to draw a perfect square.</p>
+                <p><em>Hint: You'll need to repeat a pattern 4 times.</em></p>
+            </div>
+            
+            <div class="challenge-card">
+                <h3>Challenge 2: Draw a Triangle</h3>
+                <p>Can you draw a triangle? Think about the angles you need to turn.</p>
+            </div>
+            
+            <div class="challenge-card">
+                <h3>Challenge 3: Colorful Shapes</h3>
+                <p>Use the color buttons to create a shape with different colored sides.</p>
+            </div>
+            
+            <div class="challenge-card">
+                <h3>Challenge 4: Draw a Star</h3>
+                <p>Try to draw a star shape. You'll need to experiment with angles!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game variables
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        const codeArea = document.getElementById('codeArea');
+        const turtle = document.getElementById('turtle');
+        const successMessage = document.getElementById('successMessage');
+        
+        let turtleX = canvas.width / 2;
+        let turtleY = canvas.height / 2;
+        let turtleAngle = 0; // Facing right (0 degrees)
+        let isPenDown = true;
+        let currentColor = 'black';
+        
+        // Initialize turtle position
+        updateTurtlePosition();
+        
+        // Available commands
+        window.moveForward = function(distance) {
+            const newX = turtleX + Math.cos(turtleAngle * Math.PI / 180) * distance;
+            const newY = turtleY + Math.sin(turtleAngle * Math.PI / 180) * distance;
+            
+            if (isPenDown) {
+                ctx.beginPath();
+                ctx.moveTo(turtleX, turtleY);
+                ctx.lineTo(newX, newY);
+                ctx.strokeStyle = currentColor;
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            }
+            
+            turtleX = newX;
+            turtleY = newY;
+            updateTurtlePosition();
+            
+            return new Promise(resolve => setTimeout(resolve, 500));
+        };
+        
+        window.turnRight = function(angle) {
+            turtleAngle += angle;
+            updateTurtlePosition();
+            return new Promise(resolve => setTimeout(resolve, 500));
+        };
+        
+        window.turnLeft = function(angle) {
+            turtleAngle -= angle;
+            updateTurtlePosition();
+            return new Promise(resolve => setTimeout(resolve, 500));
+        };
+        
+        window.penUp = function() {
+            isPenDown = false;
+            return Promise.resolve();
+        };
+        
+        window.penDown = function() {
+            isPenDown = true;
+            return Promise.resolve();
+        };
+        
+        window.changeColor = function(color) {
+            currentColor = color;
+            return Promise.resolve();
+        };
+        
+        window.repeat = async function(times, func) {
+            for (let i = 0; i < times; i++) {
+                await func();
+            }
+        };
+        
+        // Helper functions
+        function updateTurtlePosition() {
+            turtle.style.left = (canvas.offsetLeft + turtleX - 15) + 'px';
+            turtle.style.top = (canvas.offsetTop + turtleY - 15) + 'px';
+            turtle.style.transform = `rotate(${turtleAngle}deg)`;
+        }
+        
+        function addCommand(command) {
+            const cursorPos = codeArea.selectionStart;
+            const currentCode = codeArea.value;
+            
+            codeArea.value = currentCode.substring(0, cursorPos) + command + currentCode.substring(cursorPos);
+            codeArea.focus();
+            codeArea.selectionStart = cursorPos + command.length;
+            codeArea.selectionEnd = cursorPos + command.length;
+        }
+        
+        async function runCode() {
+            // Reset turtle position
+            turtleX = canvas.width / 2;
+            turtleY = canvas.height / 2;
+            turtleAngle = 0;
+            updateTurtlePosition();
+            
+            // Clear any success message
+            successMessage.style.display = 'none';
+            
+            try {
+                // Wrap the code in an async function and execute it
+                const code = `(async () => { ${codeArea.value} })();`;
+                await eval(code);
+                
+                // Check if they drew a square (simple check)
+                if (codeArea.value.includes('repeat(4') && 
+                    codeArea.value.includes('moveForward') && 
+                    codeArea.value.includes('turnRight(90)')) {
+                    successMessage.style.display = 'block';
+                }
+            } catch (error) {
+                alert("Oops! There's a mistake in your code:\n" + error.message);
+            }
+        }
+        
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            successMessage.style.display = 'none';
+        }
+        
+        // Make the canvas position available for turtle positioning
+        window.addEventListener('resize', updateTurtlePosition);
+    </script>
+</body>
+</html>
