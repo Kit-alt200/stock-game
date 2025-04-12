@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Market Simulator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        .tagline {
+            font-style: italic;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+
+        .game-container {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+        }
+
+        .main-panel {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .portfolio-summary {
+            margin-bottom: 20px;
+        }
+
+        .portfolio-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #1e3c72;
+            margin: 10px 0;
+        }
+
+        .cash-balance {
+            font-size: 1.2rem;
+            color: #27ae60;
+            margin: 5px 0;
+        }
+
+        .stock-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stock-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #1e3c72;
+            transition: transform 0.2s;
+        }
+
+        .stock-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .stock-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .stock-price {
+            font-size: 1.3rem;
+            margin: 5px 0;
+        }
+
+        .price-up {
+            color: #27ae60;
+        }
+
+        .price-down {
+            color: #e74c3c;
+        }
+
+        .price-neutral {
+            color: #7f8c8d;
+        }
+
+        .stock-change {
+            font-size: 0.9rem;
+        }
+
+        .stock-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .buy-btn {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .buy-btn:hover {
+            background-color: #219653;
+        }
+
+        .sell-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .sell-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .neutral-btn {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .neutral-btn:hover {
+            background-color: #2980b9;
+        }
+
+        input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 60px;
+            text-align: center;
+        }
+
+        .portfolio-stocks {
+            margin-top: 20px;
+        }
+
+        .portfolio-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .portfolio-item:last-child {
+            border-bottom: none;
+        }
+
+        .news-feed {
+            margin-top: 20px;
+        }
+
+        .news-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .news-item:last-child {
+            border-bottom: none;
+        }
+
+        .news-time {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+        }
+
+        .news-headline {
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .chart-container {
+            height: 300px;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .time-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+            max-width: 90%;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #1e3c72;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Stock Market Simulator</h1>
+            <p class="tagline">Build your virtual fortune on Wall Street</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="game-container">
+            <div class="main-panel">
+                <h2>Market Overview</h2>
+                
+                <div class="time-controls">
+                    <button id="pauseBtn" class="neutral-btn">⏸ Pause</button>
+                    <button id="speed1Btn" class="neutral-btn">1x</button>
+                    <button id="speed2Btn" class="neutral-btn">2x</button>
+                    <button id="speed5Btn" class="neutral-btn">5x</button>
+                    <span id="currentDate" style="margin-left: auto; font-weight: bold;">Day 1</span>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="priceChart"></canvas>
+                </div>
+                
+                <h3>Available Stocks</h3>
+                <div class="stock-list" id="stockList">
+                    <!-- Stock cards will be generated by JavaScript -->
+                </div>
+            </div>
+            
+            <div class="sidebar">
+                <div class="portfolio-summary">
+                    <h3>Your Portfolio</h3>
+                    <div class="portfolio-value" id="portfolioValue">$10,000.00</div>
+                    <div class="cash-balance" id="cashBalance">Cash: $10,000.00</div>
+                </div>
+                
+                <div class="portfolio-stocks" id="portfolioStocks">
+                    <h4>Your Holdings</h4>
+                    <!-- Portfolio items will be generated by JavaScript -->
+                    <div id="noHoldings">You don't own any stocks yet.</div>
+                </div>
+                
+                <div class="news-feed">
+                    <h4>Market News</h4>
+                    <div id="newsFeed">
+                        <!-- News items will be generated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="game-controls">
+                    <button id="newGameBtn" class="neutral-btn">New Game</button>
+                    <button id="helpBtn" class="neutral-btn">Help</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trade Modal -->
+    <div class="modal" id="tradeModal">
+        <div class="modal-content">
+            <div class="modal-title" id="tradeModalTitle">Buy Stock</div>
+            <div class="form-group">
+                <label for="tradeAmount">Shares to <span id="tradeAction">buy</span>:</label>
+                <input type="number" id="tradeAmount" min="1" value="1">
+            </div>
+            <div class="form-group">
+                <label>Total Cost: <span id="tradeTotal">$0.00</span></label>
+            </div>
+            <div class="modal-actions">
+                <button id="cancelTradeBtn" class="sell-btn">Cancel</button>
+                <button id="confirmTradeBtn" class="buy-btn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="modal" id="helpModal">
+        <div class="modal-content">
+            <div class="modal-title">Stock Market Simulator Help</div>
+            <p>Welcome to the Stock Market Simulator! Here's how to play:</p>
+            <ul>
+                <li><strong>Starting Cash:</strong> $10,000 virtual dollars</li>
+                <li><strong>Goal:</strong> Grow your portfolio as much as possible</li>
+                <li><strong>Buying Stocks:</strong> Click "Buy" on any stock, enter the number of shares, and confirm</li>
+                <li><strong>Selling Stocks:</strong> View your portfolio and click "Sell" on any owned stock</li>
+                <li><strong>Time Controls:</strong> Speed up or pause the simulation</li>
+                <li><strong>Market News:</strong> Events that affect stock prices</li>
+            </ul>
+            <p>Stock prices change randomly but are influenced by market news. Watch the trends and make smart investments!</p>
+            <div class="modal-actions">
+                <button id="closeHelpBtn" class="neutral-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Game State
+            let gameState = {
+                cash: 10000,
+                portfolio: {},
+                day: 1,
+                paused: false,
+                speed: 1,
+                currentStock: null,
+                currentTradeType: 'buy'
+            };
+
+            // Stock Data
+            const stocks = {
+                'TECH': { name: 'TechCorp', price: 150, volatility: 0.05, trend: 0.01, owned: 0 },
+                'GLOB': { name: 'Global Inc', price: 85, volatility: 0.03, trend: 0.005, owned: 0 },
+                'ENER': { name: 'EnergyPlus', price: 120, volatility: 0.07, trend: -0.003, owned: 0 },
+                'MEDI': { name: 'MediHealth', price: 200, volatility: 0.04, trend: 0.008, owned: 0 },
+                'AUTO': { name: 'AutoMakers', price: 65, volatility: 0.06, trend: 0.002, owned: 0 },
+                'FASH': { name: 'FashionCo', price: 45, volatility: 0.08, trend: -0.005, owned: 0 },
+                'BANK': { name: 'BigBank', price: 110, volatility: 0.03, trend: 0.004, owned: 0 },
+                'FOOD': { name: 'FoodGood', price: 30, volatility: 0.02, trend: 0.001, owned: 0 }
+            };
+
+            // Price History for Chart
+            const priceHistory = {};
+            Object.keys(stocks).forEach(symbol => {
+                priceHistory[symbol] = Array(30).fill(stocks[symbol].price);
+            });
+
+            // News Events
+            const newsEvents = [
+                { headline: "TechCorp announces breakthrough product", impact: { 'TECH': 0.1 } },
+                { headline: "Global Inc reports disappointing earnings", impact: { 'GLOB': -0.15 } },
+                { headline: "Oil prices surge, energy stocks rally", impact: { 'ENER': 0.2 } },
+                { headline: "New healthcare legislation passes", impact: { 'MEDI': 0.08, 'GLOB': 0.05 } },
+                { headline: "Auto industry faces supply chain issues", impact: { 'AUTO': -0.12 } },
+                { headline: "FashionCo's new line exceeds expectations", impact: { 'FASH': 0.18 } },
+                { headline: "Interest rates rise, banks benefit", impact: { 'BANK': 0.1 } },
+                { headline: "FoodGood recalls popular product", impact: { 'FOOD': -0.25 } },
+                { headline: "Market reaches all-time high", impact: Object.fromEntries(Object.keys(stocks).map(s => [s, 0.05])) },
+                { headline: "Economic downturn fears grow", impact: Object.fromEntries(Object.keys(stocks).map(s => [s, -0.07])) }
+            ];
+
+            // Chart Setup
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: Array(30).fill(''), datasets: [] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: false },
+                        x: { display: false }
+                    },
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+
+            // DOM Elements
+            const stockListEl = document.getElementById('stockList');
+            const portfolioStocksEl = document.getElementById('portfolioStocks');
+            const noHoldingsEl = document.getElementById('noHoldings');
+            const portfolioValueEl = document.getElementById('portfolioValue');
+            const cashBalanceEl = document.getElementById('cashBalance');
+            const newsFeedEl = document.getElementById('newsFeed');
+            const currentDateEl = document.getElementById('currentDate');
+            
+            // Modal Elements
+            const tradeModal = document.getElementById('tradeModal');
+            const tradeModalTitle = document.getElementById('tradeModalTitle');
+            const tradeAction = document.getElementById('tradeAction');
+            const tradeAmount = document.getElementById('tradeAmount');
+            const tradeTotal = document.getElementById('tradeTotal');
+            const confirmTradeBtn = document.getElementById('confirmTradeBtn');
+            const cancelTradeBtn = document.getElementById('cancelTradeBtn');
+            
+            const helpModal = document.getElementById('helpModal');
+            const helpBtn = document.getElementById('helpBtn');
+            const closeHelpBtn = document.getElementById('closeHelpBtn');
+            const newGameBtn = document.getElementById('newGameBtn');
+            
+            // Time Controls
+            const pauseBtn = document.getElementById('pauseBtn');
+            const speed1Btn = document.getElementById('speed1Btn');
+            const speed2Btn = document.getElementById('speed2Btn');
+            const speed5Btn = document.getElementById('speed5Btn');
+
+            // Initialize Game
+            function initGame() {
+                gameState = {
+                    cash: 10000,
+                    portfolio: {},
+                    day: 1,
+                    paused: false,
+                    speed: 1,
+                    currentStock: null,
+                    currentTradeType: 'buy'
+                };
+                
+                // Reset stocks
+                Object.keys(stocks).forEach(symbol => {
+                    stocks[symbol].owned = 0;
+                    priceHistory[symbol] = Array(30).fill(stocks[symbol].price);
+                });
+                
+                updateUI();
+                updateChart();
+                startGameLoop();
+            }
+
+            // Game Loop
+            let gameInterval;
+            function startGameLoop() {
+                clearInterval(gameInterval);
+                
+                const speeds = { 1: 1000, 2: 500, 5: 200 };
+                gameInterval = setInterval(advanceDay, speeds[gameState.speed]);
+            }
+
+            function advanceDay() {
+                if (gameState.paused) return;
+                
+                gameState.day++;
+                currentDateEl.textContent = `Day ${gameState.day}`;
+                
+                // Update stock prices
+                Object.keys(stocks).forEach(symbol => {
+                    const stock = stocks[symbol];
+                    
+                    // Random price movement based on volatility and trend
+                    const randomChange = (Math.random() * 2 - 1) * stock.volatility;
+                    const newPrice = stock.price * (1 + randomChange + stock.trend);
+                    
+                    // Ensure price doesn't go below $1
+                    stock.price = Math.max(1, newPrice);
+                    
+                    // Update price history
+                    priceHistory[symbol].shift();
+                    priceHistory[symbol].push(stock.price);
+                });
+                
+                // Random news event
+                if (Math.random() < 0.3) {
+                    const event = newsEvents[Math.floor(Math.random() * newsEvents.length)];
+                    applyNewsEvent(event);
+                }
+                
+                updateUI();
+                updateChart();
+            }
+
+            function applyNewsEvent(event) {
+                // Apply impacts
+                Object.keys(event.impact).forEach(symbol => {
+                    stocks[symbol].price *= (1 + event.impact[symbol]);
+                });
+                
+                // Add to news feed
+                const newsItem = document.createElement('div');
+                newsItem.className = 'news-item';
+                newsItem.innerHTML = `
+                    <div class="news-time">Day ${gameState.day}</div>
+                    <div class="news-headline">${event.headline}</div>
+                `;
+                newsFeedEl.insertBefore(newsItem, newsFeedEl.firstChild);
+                
+                // Limit news items
+                if (newsFeedEl.children.length > 5) {
+                    newsFeedEl.removeChild(newsFeedEl.lastChild);
+                }
+            }
+
+            // Update UI
+            function updateUI() {
+                // Update stock list
+                stockListEl.innerHTML = '';
+                Object.keys(stocks).forEach(symbol => {
+                    const stock = stocks[symbol];
+                    const change = priceHistory[symbol][29] - priceHistory[symbol][28];
+                    const changePercent = (change / priceHistory[symbol][28]) * 100;
+                    
+                    const stockCard = document.createElement('div');
+                    stockCard.className = 'stock-card';
+                    stockCard.innerHTML = `
+                        <div class="stock-name">${stock.name} (${symbol})</div>
+                        <div class="stock-price ${getPriceChangeClass(change)}">$${stock.price.toFixed(2)}</div>
+                        <div class="stock-change ${getPriceChangeClass(change)}">
+                            ${change >= 0 ? '+' : ''}${change.toFixed(2)} (${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)
+                        </div>
+                        <div class="stock-actions">
+                            <button class="buy-btn" data-symbol="${symbol}">Buy</button>
+                        </div>
+                    `;
+                    stockListEl.appendChild(stockCard);
+                });
+                
+                // Update portfolio
+                portfolioStocksEl.innerHTML = '<h4>Your Holdings</h4>';
+                let hasHoldings = false;
+                
+                Object.keys(stocks).forEach(symbol => {
+                    if (stocks[symbol].owned > 0) {
+                        hasHoldings = true;
+                        const stock = stocks[symbol];
+                        const value = stock.price * stock.owned;
+                        
+                        const portfolioItem = document.createElement('div');
+                        portfolioItem.className = 'portfolio-item';
+                        portfolioItem.innerHTML = `
+                            <div>
+                                <strong>${stock.name} (${symbol})</strong><br>
+                                ${stock.owned} shares @ $${stock.price.toFixed(2)}
+                            </div>
+                            <div>
+                                $${value.toFixed(2)}<br>
+                                <button class="sell-btn" data-symbol="${symbol}">Sell</button>
+                            </div>
+                        `;
+                        portfolioStocksEl.appendChild(portfolioItem);
+                    }
+                });
+                
+                noHoldingsEl.style.display = hasHoldings ? 'none' : 'block';
+                
+                // Update portfolio value
+                const portfolioValue = Object.keys(stocks).reduce((total, symbol) => {
+                    return total + (stocks[symbol].price * stocks[symbol].owned);
+                }, 0);
+                
+                const totalValue = portfolioValue + gameState.cash;
+                portfolioValueEl.textContent = `$${totalValue.toFixed(2)}`;
+                cashBalanceEl.textContent = `Cash: $${gameState.cash.toFixed(2)}`;
+                
+                // Add event listeners to new buttons
+                document.querySelectorAll('.buy-btn').forEach(btn => {
+                    btn.addEventListener('click', () => openTradeModal(btn.dataset.symbol, 'buy'));
+                });
+                
+                document.querySelectorAll('.sell-btn').forEach(btn => {
+                    btn.addEventListener('click', () => openTradeModal(btn.dataset.symbol, 'sell'));
+                });
+            }
+
+            function getPriceChangeClass(change) {
+                if (change > 0) return 'price-up';
+                if (change < 0) return 'price-down';
+                return 'price-neutral';
+            }
+
+            function updateChart() {
+                const datasets = Object.keys(stocks).map(symbol => {
+                    return {
+                        label: symbol,
+                        data: priceHistory[symbol],
+                        borderColor: getRandomColor(),
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.1
+                    };
+                });
+                
+                chart.data.datasets = datasets;
+                chart.update();
+            }
+
+            function getRandomColor() {
+                const letters = '0123456789ABCDEF';
+                let color = '#';
+                for (let i = 0; i < 6; i++) {
+                    color += letters[Math.floor(Math.random() * 16)];
+                }
+                return color;
+            }
+
+            // Trade Functions
+            function openTradeModal(symbol, type) {
+                gameState.currentStock = symbol;
+                gameState.currentTradeType = type;
+                
+                tradeModalTitle.textContent = type === 'buy' ? `Buy ${stocks[symbol].name}` : `Sell ${stocks[symbol].name}`;
+                tradeAction.textContent = type;
+                tradeAmount.value = '1';
+                updateTradeTotal();
+                
+                tradeModal.style.display = 'flex';
+            }
+
+            function updateTradeTotal() {
+                const amount = parseInt(tradeAmount.value) || 0;
+                const total = amount * stocks[gameState.currentStock].price;
+                tradeTotal.textContent = `$${total.toFixed(2)}`;
+            }
+
+            function executeTrade() {
+                const symbol = gameState.currentStock;
+                const amount = parseInt(tradeAmount.value) || 0;
+                const price = stocks[symbol].price;
+                const total = amount * price;
+                
+                if (gameState.currentTradeType === 'buy') {
+                    if (total > gameState.cash) {
+                        alert("Not enough cash for this purchase!");
+                        return false;
+                    }
+                    
+                    gameState.cash -= total;
+                    stocks[symbol].owned += amount;
+                } else {
+                    if (amount > stocks[symbol].owned) {
+                        alert("You don't own that many shares!");
+                        return false;
+                    }
+                    
+                    gameState.cash += total;
+                    stocks[symbol].owned -= amount;
+                }
+                
+                updateUI();
+                return true;
+            }
+
+            // Event Listeners
+            tradeAmount.addEventListener('input', updateTradeTotal);
+            
+            confirmTradeBtn.addEventListener('click', () => {
+                if (executeTrade()) {
+                    tradeModal.style.display = 'none';
+                }
+            });
+            
+            cancelTradeBtn.addEventListener('click', () => {
+                tradeModal.style.display = 'none';
+            });
+            
+            helpBtn.addEventListener('click', () => {
+                helpModal.style.display = 'flex';
+            });
+            
+            closeHelpBtn.addEventListener('click', () => {
+                helpModal.style.display = 'none';
+            });
+            
+            newGameBtn.addEventListener('click', () => {
+                if (confirm("Are you sure you want to start a new game? Your current progress will be lost.")) {
+                    initGame();
+                }
+            });
+            
+            // Time Controls
+            pauseBtn.addEventListener('click', () => {
+                gameState.paused = !gameState.paused;
+                pauseBtn.textContent = gameState.paused ? '▶ Resume' : '⏸ Pause';
+            });
+            
+            speed1Btn.addEventListener('click', () => {
+                gameState.speed = 1;
+                startGameLoop();
+                updateSpeedButtons();
+            });
+            
+            speed2Btn.addEventListener('click', () => {
+                gameState.speed = 2;
+                startGameLoop();
+                updateSpeedButtons();
+            });
+            
+            speed5Btn.addEventListener('click', () => {
+                gameState.speed = 5;
+                startGameLoop();
+                updateSpeedButtons();
+            });
+            
+            function updateSpeedButtons() {
+                speed1Btn.style.backgroundColor = gameState.speed === 1 ? '#2980b9' : '#3498db';
+                speed2Btn.style.backgroundColor = gameState.speed === 2 ? '#2980b9' : '#3498db';
+                speed5Btn.style.backgroundColor = gameState.speed === 5 ? '#2980b9' : '#3498db';
+            }
+            
+            // Initialize the game
+            initGame();
+        });
+    </script>
+</body>
+</html>
